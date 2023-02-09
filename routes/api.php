@@ -23,10 +23,13 @@ use App\Http\Controllers\API\AuthController;
 
 Route::post('/auth/register',[AuthController::class,'register']);
 Route::post('/auth/login',[AuthController::class,'login']);
+Route::middleware(['auth:sanctum','role:ogrenci'])->group(function (){
 
 
-Route::middleware('auth:sanctum')->group(function (){
-      Route::get('/ogrenci',[AuthController::class,'getUser']);
+});
+Route::middleware(['auth:sanctum','role:ogretmen'])->group(function (){
+
+
 });
 
 

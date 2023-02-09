@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
@@ -18,9 +19,7 @@ class AuthController extends Controller
                 'email'=>'required|email|unique:users',
                 'password'=>'required',
              ]);
-
             if ($validator->fails()){
-
                  return response()->json([
                     'status'=>false,
                     'message'=>$validator->errors()->all(),
@@ -31,16 +30,18 @@ class AuthController extends Controller
                 'email'=>$request->email,
                 'password'=>Hash::make($request->password),
             ]);
+            $user->syncRoles('ogretmen');
             $token=$user->createToken("APİ TOKEN")->plainTextToken;
+
             return response()->json([
                 'status'=>true,
-                'succses'=>'kullanıcı başarı ile oluşturuldu',
+                'succsess'=>'kullanıcı başarı ile oluşturuldu',
                 'token'=>$token
-            ]);
+            ],200);
         }catch (\Throwable $e){
             return response()->json([
                 'status'=>false,
-                'succses'=>'Kayıt oluşturulurken Bir Hata Oluştu',
+                'message'=>$e->getMessage(),
             ],400);
         }
     }
