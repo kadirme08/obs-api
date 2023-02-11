@@ -24,5 +24,10 @@ class RolePermissonSeeder extends Seeder
            'guard_name'=>'api'
 
        ]);
+        Role::create([
+            'name'=>'admin',
+            'guard_name'=>'api'
+
+        ]);
     }
 }

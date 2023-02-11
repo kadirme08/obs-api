@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\API\akademikAuth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
@@ -29,6 +28,7 @@ class AuthController extends Controller
                 'name'=>$request->name,
                 'email'=>$request->email,
                 'password'=>Hash::make($request->password),
+                'Utype'=>'ogretmen'
             ]);
             $user->syncRoles('ogretmen');
             $token=$user->createToken("APİ TOKEN")->plainTextToken;

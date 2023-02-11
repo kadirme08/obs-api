@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'Utype',
     ];
     public $guard_name = 'api';
     /**
