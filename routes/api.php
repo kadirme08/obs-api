@@ -7,6 +7,7 @@ use App\Http\Controllers\API\StudentController;
 use App\Http\Controllers\API\TeacherController;
 use App\Http\Controllers\API\ogrenciAuth\StudentAuthController;
 use App\Http\Controllers\API\SubjectController;
+use App\Http\Controllers\API\TimeTableController;
 use App\Http\Controllers\API\SubjectRootController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,13 +46,12 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
     Route::delete('/classroomDelete/{id}',[ClassromController::class,'classroomDelete']);
     Route::put('/classroomChangeStatus/{id}',[ClassromController::class,'changeStatus']);
     Route::get('/classroomSearch/{searchTerm}',[ClassromController::class,'searchTerm']);
-
-
  //StudentController
     Route::post('/studentAdd',[StudentController::class,'studentAdd']);
     Route::get('/studentList',[StudentController::class,'studentList']);
+    Route::get('/studentSelectClassList',[StudentController::class,'studentSelectClassList']);
+    Route::post('/studentSelectClassAdd',[StudentController::class,'studentSelectClassAdd']);
     Route::post('/studentSearch',[StudentController::class,'search']);
-
   //Subject Controller
     Route::post('/subjectAdd',[SubjectController::class,'subjectAdd']);
     Route::put('/subjectUpdate/{id}',[SubjectController::class,'subjectUpdate']);
@@ -65,12 +65,20 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
     Route::put('/subjectRootUpdate/{id}',[SubjectRootController::class,'subjectRootUpdate']);
     Route::get('/subjectRootList',[SubjectRootController::class,'subjectRootList']);
     Route::delete('/subjectRootDelete/{id}',[SubjectRootController::class,'subjectRootDelete']);
-});
-Route::middleware(['auth:sanctum','role:ogrenci'])->group(function (){
-
-
+    //TimeTableController
+    Route::get('/timeTableList',[TimeTableController::class,'timeTableList']);
+    Route::post('/timeTableAdd',[TimeTableController::class,'timeTableAdd']);
+    Route::put('/timeTableUpdate/{id}',[TimeTableController::class,'timeTableUpdate']);
+    Route::delete('/timeTableDelete/{id}',[TimeTableController::class,'timeTableDelete']);
+    Route::post('/searchClass/{searchTerm}',[TimeTableController::class,'searchClass']);
+    //
 });
 Route::middleware(['auth:sanctum','role:ogretmen'])->group(function (){
+
+});
+
+Route::middleware(['auth:sanctum','role:ogrenci'])->group(function (){
+
 
 });
 
