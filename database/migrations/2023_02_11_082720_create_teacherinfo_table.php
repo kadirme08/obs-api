@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('teacherinfo', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('user_id')->unsigned();
-            $table->integer('tc_kimlik')->unique();
+            $table->string('tc_kimlik')->unique();
             $table->string('isim_soyisim');
             $table->string('adres');
             $table->string('cinsiyet');

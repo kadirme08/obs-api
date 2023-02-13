@@ -4,7 +4,10 @@ use App\Http\Controllers\API\akademikAuth\AuthController;
 use App\Http\Controllers\Api\ClassromController;
 use App\Http\Controllers\API\IndexController;
 use App\Http\Controllers\API\StudentController;
+use App\Http\Controllers\API\TeacherController;
 use App\Http\Controllers\API\ogrenciAuth\StudentAuthController;
+use App\Http\Controllers\API\SubjectController;
+use App\Http\Controllers\API\SubjectRootController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -34,9 +37,7 @@ Route::post('/ogrenci/auth/login',[StudentAuthController::class,'register']);
 
 
 Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(function (){
-
-     Route::get('/index',[IndexController::class,'ShowIndex']);
-
+   Route::get('/index',[IndexController::class,'ShowIndex']);
 //Classroom Controller
      Route::post('/classroomAdd',[ClassromController::class,'classroomAdd']);
      Route::get('/classroomList',[ClassromController::class,'classroomList']);
@@ -50,11 +51,20 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
     Route::post('/studentAdd',[StudentController::class,'studentAdd']);
     Route::get('/studentList',[StudentController::class,'studentList']);
     Route::post('/studentSearch',[StudentController::class,'search']);
-    //
 
-
-
-
+  //Subject Controller
+    Route::post('/subjectAdd',[SubjectController::class,'subjectAdd']);
+    Route::put('/subjectUpdate/{id}',[SubjectController::class,'subjectUpdate']);
+    //Teacher Controller
+    Route::post('/teacherAdd',[TeacherController::class,'teacherAdd']);
+    Route::put('/teacherUpdate/{id}',[TeacherController::class,'teacherUpdate']);
+    Route::delete('/teacherDelete/{id}',[TeacherController::class,'teacherDelete']);
+    //Subject Rooting Contorller
+    Route::get('/subjectList',[SubjectRootController::class,'List']);
+    Route::post('/subjectRootAdd',[SubjectRootController::class,'subjectRootAdd']);
+    Route::put('/subjectRootUpdate/{id}',[SubjectRootController::class,'subjectRootUpdate']);
+    Route::get('/subjectRootList',[SubjectRootController::class,'subjectRootList']);
+    Route::delete('/subjectRootDelete/{id}',[SubjectRootController::class,'subjectRootDelete']);
 });
 Route::middleware(['auth:sanctum','role:ogrenci'])->group(function (){
 
