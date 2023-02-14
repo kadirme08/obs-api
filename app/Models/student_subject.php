@@ -14,7 +14,7 @@ class student_subject extends Model
     protected $with=["ogrenci","sinif","ders_secimi"];
 
     public function ogrenci(){
-        return $this->hasOne(studentinfo::class,'id','ogrenci_id');
+        return $this->hasOne(User::class,'id','ogrenci_id');
 
     }
     public function sinif(){
