@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\ogrenciAuth;
+namespace App\Http\Controllers\API\admin\API\ogrenciAuth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -28,7 +28,7 @@ class StudentAuthController extends Controller
                 'name'=>$request->name,
                 'email'=>$request->email,
                 'password'=>Hash::make($request->password),
-                'Utype'=>'ogrenci'
+                'Utype'=>'1'
             ]);
             $user->syncRoles('ogrenci');
             $token=$user->createToken("APİ TOKEN")->plainTextToken;
@@ -60,10 +60,10 @@ class StudentAuthController extends Controller
             }
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
                 $user=User::where('email',$request->email)->first();
-                $token=$user->createToken("APİ TOKEN")->plainTextToken;
+
                 return response()->json([
                     'user'=>$user,
-                    'token'=>$token,
+
                 ],200);
             }else{
                 return response()->json([

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\API\admin\API\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\teacher_attendance;
@@ -13,7 +13,6 @@ class TeacherAttendanceController extends Controller
          try {
              $ogretmen_id=$request->ogretmen_id;
              $data=teacher_attendance::where('user_id',$ogretmen_id)->get();
-             dd($data);
              if($data){
                  return response()->json([
                      'status'=>true,

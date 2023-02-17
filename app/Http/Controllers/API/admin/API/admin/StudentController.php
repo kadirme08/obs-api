@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\API\admin\API\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
@@ -74,7 +74,7 @@ class StudentController extends Controller
                     'sube'=>$request->sube,
                     'sinif'=>$request->sinif,
                 ],200);
-                 student_guardian::create([
+                /* student_guardian::create([
                      'user_id'=>$user_id,
                      'tc_kimlik'=>$request->guardian_tc_kimlik,
                      'isim_soyisim'=>$request->guardian_name,
@@ -84,7 +84,7 @@ class StudentController extends Controller
                      'dogum_tarihi'=>$request->guardian_dogum_tarihi,
                      'cinsiyet'=>$request->guardian_cinsiyet,
                      'profil_foto'=>$request->guardian_profil_foto
-                 ]);
+                 ]);*/
                 if ($data){
                     return response()->json([
                        'status'=>true,

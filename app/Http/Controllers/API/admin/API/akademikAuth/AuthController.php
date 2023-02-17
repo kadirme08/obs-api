@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\akademikAuth;
+namespace App\Http\Controllers\API\admin\API\akademikAuth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -28,15 +28,15 @@ class AuthController extends Controller
                 'name'=>$request->name,
                 'email'=>$request->email,
                 'password'=>Hash::make($request->password),
-                'Utype'=>'ogretmen'
+                'Utype'=>'2'
             ]);
             $user->syncRoles('ogretmen');
-            $token=$user->createToken("APİ TOKEN")->plainTextToken;
+
 
             return response()->json([
                 'status'=>true,
                 'succsess'=>'kullanıcı başarı ile oluşturuldu',
-                'token'=>$token
+
             ],200);
         }catch (\Throwable $e){
             return response()->json([
@@ -63,7 +63,7 @@ class AuthController extends Controller
                 $token=$user->createToken("APİ TOKEN")->plainTextToken;
                 return response()->json([
                  'user'=>$user,
-                 'token'=>$token,
+                    'token'=>$token
                  ],200);
             }else{
                 return response()->json([

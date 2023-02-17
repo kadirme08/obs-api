@@ -34,7 +34,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-    protected $with=["ogrenci_bilgisi","veli_bilgisi","odeme_bilgileri"];
+
     /**
      * The attributes that should be cast.
      *
@@ -46,7 +46,7 @@ class User extends Authenticatable
 
 
     public function ogrenci_bilgisi(){
-        return $this->hasOne(studentinfo::class,'user_id','id');
+            return $this->hasOne(studentinfo::class,'user_id','id');
     }
     public function veli_bilgisi(){
         return $this->hasOne(student_guardian::class,'user_id','id');
@@ -54,4 +54,5 @@ class User extends Authenticatable
     public function odeme_bilgileri(){
         return $this->hasMany(student_payment::class,'user_id','id');
     }
+
 }

@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\API\admin\API\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\studentinfo;
 use App\Models\teacherinfo;
-use Illuminate\Http\Request;
 
 class IndexController extends Controller
 {

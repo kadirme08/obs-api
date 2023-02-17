@@ -13,8 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('subject_root', function (Blueprint $table) {
-            $table->string('ders_saati')->after('ogretmen_id');
+        Schema::create('exam_name', function (Blueprint $table) {
+            $table->id();
+            $table->string('sinav_adi');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('subject_root', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('exam_name');
     }
 };

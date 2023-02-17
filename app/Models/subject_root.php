@@ -16,7 +16,7 @@ class subject_root extends Model
         return $this->hasMany(Classroom::class,'id','sinif_id');
     }
     public function ders(){
-        return $this->hasOne(subject::class,'id','ders_id');
+        return $this->hasMany(subject::class,'id','ders_id');
     }
     public function ogretmen(){
         return $this->hasOne(teacherinfo::class,'id','ogretmen_id');
