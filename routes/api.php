@@ -13,8 +13,12 @@ use App\Http\Controllers\API\admin\API\admin\TimeTableController;
 use App\Http\Controllers\API\admin\API\akademikAuth\AuthController;
 use App\Http\Controllers\API\admin\API\ogrenciAuth\StudentAuthController;
 
-
 use App\Http\Controllers\API\akademik\MystudentController;
+use App\Http\Controllers\API\akademik\MyTimeTableController;
+use App\Http\Controllers\API\akademik\MyAttandanceListControler;
+use App\Http\Controllers\API\ogrenci\studentSubjectListController;
+use App\Http\Controllers\API\ogrenci\studentMytable;
+use App\Http\Controllers\API\ogrenci\studentAttandanceController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -36,9 +40,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/akademik/auth/register',[AuthController::class,'register']);
 Route::post('/akademik/auth/login',[AuthController::class,'login']);
 Route::post('/ogrenci/auth/register',[StudentAuthController::class,'register']);
-Route::post('/ogrenci/auth/login',[StudentAuthController::class,'register']);
+Route::post('/ogrenci/auth/login',[StudentAuthController::class,'login']);
 
-Route::prefix('admin')->middleware(['auth:sanctum','role:ogretmen'])->group(function (){
+Route::prefix('admin')->middleware(['auth:sanctum','role:ogrenci'])->group(function (){
    Route::get('/index',[IndexController::class,'ShowIndex']);
 //Classroom Controller
      Route::post('/classroomAdd',[ClassromController::class,'classroomAdd']);
@@ -83,6 +87,7 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:ogretmen'])->group(func
     Route::get('/studentAttandanceSearchlist/{sinif_id}',[StudentAttendance::class,'StudentAttandanceSearchlist']);
     //TeacherAttendanceController
     Route::post('/teacherAttendanceList',[TeacherAttendanceController::class,'TeacherAttendanceList']);
+    Route::post('/TeacherAttendanceAdd',[TeacherAttendanceController::class,'TeacherAttendanceAdd']);
     //Exam Controller
     Route::get('/examList',[ExamController::class,'examList']);
     Route::post('/examAdd',[ExamController::class,'examAdd']);
@@ -92,9 +97,21 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:ogretmen'])->group(func
     Route::get('/mySubjecList',[MystudentController::class,'mySubjecList']);
     Route::get('/myStudentList',[MystudentController::class,'myStudentList']);
     Route::post('/searchSubjectList',[MystudentController::class,'searchSubjectList']);
-});
+    Route::post('/studentScore',[MystudentController::class,'StudentScore']);
+    Route::post('/StudentUpdateScore',[MystudentController::class,'StudentUpdateScore']);
 
-Route::middleware(['auth:sanctum','role:ogrenci'])->group(function (){
+    //
+    Route::get('/mytimeTableList',[MyTimeTableController::class,'MytimeTableList']);
+    //
+    Route::get('/MyAttadanceList',[MyAttandanceListControler::class,'MyAttadanceList']);
+});
+Route::prefix('admin')->middleware(['auth:sanctum','role:ogrenci'])->group(function (){
+    Route::get('/studentSubjectList',[studentSubjectListController::class,'studentSubjectList']);
+    Route::get('/studentTeacherList',[studentSubjectListController::class,'studentTeacherList']);
+    //
+    Route::get('/myTableList',[studentMytable::class,'myTableList']);
+    //
+    Route::get('/studentAttandanceList',[studentAttandanceController::class,'studentAttandanceList']);
 
 
 });

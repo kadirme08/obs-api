@@ -13,6 +13,7 @@ class StudentAuthController extends Controller
 {
     public function register(Request $request){
         try {
+
             $validator=Validator::make($request->all(),[
                 'name'=>'required',
                 'email'=>'required|email|unique:users',
@@ -58,12 +59,12 @@ class StudentAuthController extends Controller
                     'message'=>$validator->errors()->all()
                 ]);
             }
-            if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            if (Auth::attempt(['email' => $request->email, 'password' => $request->password,'Utype'=>1])) {
                 $user=User::where('email',$request->email)->first();
-
+                $token=$user->createToken("APİ TOKEN")->plainTextToken;
                 return response()->json([
                     'user'=>$user,
-
+                    'token'=>$token
                 ],200);
             }else{
                 return response()->json([

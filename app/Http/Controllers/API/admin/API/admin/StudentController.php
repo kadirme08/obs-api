@@ -42,8 +42,7 @@ class StudentController extends Controller
                 'telefon'=>'required',
                 'dogum_tarihi'=>'required',
                 'cinsiyet'=>'required',
-                'sube'=>'required',
-                'sinif'=>'required',
+
             ]);
             if ($validator->fails()){
                  return response()->json([

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\akademik;
 
 use App\Http\Controllers\Controller;
+use App\Models\student_score;
 use App\Models\studentinfo;
 use App\Models\subject_root;
 use App\Models\subject_root_student_count;
@@ -10,6 +11,7 @@ use App\Models\teacherinfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class MystudentController extends Controller
 {
@@ -34,13 +36,11 @@ class MystudentController extends Controller
                    'message'=>"Ögretmenin kayıtlı dersi bulunamadı"
                 ]);
             }
-
         }catch (\exception $e){
             return response()->json([
                'status'=>"false",
                'message'=>$e->getMessage()
             ],400);
-
         }
     }
     public function myStudentList(){
@@ -128,5 +128,84 @@ class MystudentController extends Controller
 
 
     }
+    public function StudentScore(Request $request){
+        try {
+            $validator=Validator::make($request->all(),[
+                'ogrenci_id'=>'required',
+                'ders_id'=>'required',
+            ]);
+            if ($validator->fails()){
+                return  response()->json([
+                   'satatus'=>false,
+                   'message'=>$validator->errors()->all()
+                ],422);
+            }else{
+                 $data=student_score::create([
+                    'ogrenci_id'=>$request->ogrenci_id,
+                    'ders_id'=>$request->ders_id,
+                    'vize_not'=>$request->vize_not,
+                    'final_not'=>$request->final_not
+                 ]);
+                 if($data){
+                     return response()->json([
+                        'status'=>true,
+                        'Message'=>"Puan Verme İşlemi başarılı"
+                     ],201);
+                 }else{
+                     return response()->json([
+                        'status'=>false,
+                         'message'=>'Puan olusturulurken sıkıntı oldu'
+                     ],400);
+                 }
+            }
+        }catch (\exception $e){
+            return response()->json([
+               'status'=>false,
+               'message'=>$e->getMessage()
+            ],400);
+        }
 
+
+
+
+
+    }
+    public function StudentUpdateScore(Request $request){
+        try {
+            $validator=Validator::make($request->all(),[
+                'ogrenci_id'=>'required',
+                'ders_id'=>'required',
+            ]);
+            if ($validator->fails()){
+                return  response()->json([
+                    'satatus'=>false,
+                    'message'=>$validator->errors()->all()
+                ],422);
+            }else{
+                $data=student_score::where('ogrenci_id',$request->ogrenci_id)->update([
+                    'ogrenci_id'=>$request->ogrenci_id,
+                    'ders_id'=>$request->ders_id,
+                    'vize_not'=>$request->vize_not,
+                    'final_not'=>$request->final_not
+                ]);
+                if($data){
+                    return response()->json([
+                        'status'=>true,
+                        'Message'=>"Güncelleme İşlemi başarılı"
+                    ],201);
+                }else{
+                    return response()->json([
+                        'status'=>false,
+                        'message'=>'Puan olusturulurken sıkıntı oldu'
+                    ],400);
+                }
+            }
+        }catch (\exception $e){
+            return response()->json([
+                'status'=>false,
+                'message'=>$e->getMessage()
+            ],400);
+        }
+
+    }
 }
