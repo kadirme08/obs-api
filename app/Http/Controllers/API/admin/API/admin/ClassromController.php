@@ -4,11 +4,39 @@ namespace App\Http\Controllers\API\admin\API\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
+use App\Models\classroom_branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ClassromController extends Controller
 {
+    public function classroomBranch(Request $request){
+        try {
+            $data=classroom_branch::all();
+            if($data){
+                return  response()->json([
+                    'status'=>true,
+                    'data'=>$data
+                ],200);
+            }else{
+                return response()->json([
+                    'status'=>false,
+                    'Message'=>'Sube Listesi Boş '
+
+                ],400);
+            }
+
+        }catch (\exception $e){
+            return  response()->json([
+               'status'=>false,
+               'message'=>$e->getMessage()
+            ],400);
+
+        }
+
+
+
+    }
     public  function classroomAdd(Request $request){
         try {
              $validator=Validator::make($request->all(),[
@@ -51,7 +79,7 @@ class ClassromController extends Controller
         $data=Classroom::all();
          if($data){
              return  response()->json([
-                 'status'=>'true',
+                 'status'=>true,
                 'data'=>$data
              ],200);
          }else{

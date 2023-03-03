@@ -12,17 +12,16 @@ class IndexController extends Controller
         try {
             $get_student=studentinfo::get();
             $get_teacher=teacherinfo::get();
-            $data=array();
-
             return response()->json([
+                'status'=>true,
                 $data='student'=>$get_student,'teacher'=>$get_teacher
             ],200);
 
         }catch (\exception $e){
        return  response()->json([
-           'satatus'=>false,
+           'status'=>false,
            'Message'=>$e->getMessage()
-       ]);
+       ],400);
         }
     }
 }

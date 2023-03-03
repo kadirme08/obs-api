@@ -59,10 +59,11 @@ class StudentAuthController extends Controller
                     'message'=>$validator->errors()->all()
                 ]);
             }
-            if (Auth::attempt(['email' => $request->email, 'password' => $request->password,'Utype'=>1])) {
+            if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'Utype' => 1])) {
                 $user=User::where('email',$request->email)->first();
-                $token=$user->createToken("APİ TOKEN")->plainTextToken;
+                    $token=$user->createToken("APİ TOKEN")->plainTextToken;
                 return response()->json([
+                    'status'=>true,
                     'user'=>$user,
                     'token'=>$token
                 ],200);
@@ -70,13 +71,17 @@ class StudentAuthController extends Controller
                 return response()->json([
                     'status'=>false,
                     'message'=>'kullanıcı adı Yada Şifreniz yanlış'
-                ],401);
+                ]);
             }
         }catch (\Throwable $e){
             return response()->json([
                 'status'=>false,
-                'succses'=>'Giriş yaparken Bir Hata Oluştu',
+                'message'=>$e->getMessage(),
             ],400);
         }
+    }
+    public function logout(Request $request){
+       $request->user()->tokens->delete();
+       return send_ms('User Logout başarılı','true',200);
     }
 }

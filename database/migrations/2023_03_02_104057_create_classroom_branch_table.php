@@ -13,21 +13,20 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('classroom', function (Blueprint $table) {
+        Schema::create('classroom_branch', function (Blueprint $table) {
             $table->id();
-            $table->string('sinif_adi');
-            $table->string('sinif_durum')->default(0);
+            $table->string('sube');
             $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     *W
+     *
      * @return void
      */
     public function down()
     {
-        Schema::dropIfExists('classroom');
+        Schema::dropIfExists('classroom_branch');
     }
 };

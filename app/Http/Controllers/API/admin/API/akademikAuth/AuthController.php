@@ -22,7 +22,7 @@ class AuthController extends Controller
                  return response()->json([
                     'status'=>false,
                     'message'=>$validator->errors()->all(),
-                 ],422);
+                 ]);
              }
             $user=User::create([
                 'name'=>$request->name,
@@ -31,13 +31,11 @@ class AuthController extends Controller
                 'Utype'=>'2'
             ]);
             $user->syncRoles('ogretmen');
-
-
             return response()->json([
                 'status'=>true,
                 'succsess'=>'kullanıcı başarı ile oluşturuldu',
 
-            ],200);
+            ]);
         }catch (\Throwable $e){
             return response()->json([
                 'status'=>false,
@@ -56,14 +54,15 @@ class AuthController extends Controller
                 return response()->json([
                    'status'=>false,
                    'message'=>$validator->errors()->all()
-                ]);
+                ],422);
             }
-            if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            if (Auth::attempt(['email' => $request->email, 'password' => $request->password ,'Utype'=>2 ])) {
                 $user=User::where('email',$request->email)->first();
                 $token=$user->createToken("APİ TOKEN")->plainTextToken;
                 return response()->json([
+                 'status'=>true,
                  'user'=>$user,
-                    'token'=>$token
+                 'token'=>$token
                  ],200);
             }else{
                 return response()->json([
@@ -74,7 +73,7 @@ class AuthController extends Controller
         }catch (\Throwable $e){
             return response()->json([
                 'status'=>false,
-                'succses'=>'Giriş yaparken Bir Hata Oluştu',
+                'message'=>'Giriş yaparken Bir Hata Oluştu',
             ],400);
         }
   }

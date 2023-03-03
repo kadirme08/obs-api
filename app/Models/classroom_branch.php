@@ -5,12 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class studentinfo extends Model
+class classroom_branch extends Model
 {
     use HasFactory;
-
-    protected $table="studentinfo";
+    protected $table="classroom_branch";
     protected $guarded=[];
-
-
 }

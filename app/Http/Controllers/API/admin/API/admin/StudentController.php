@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\admin\API\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
+use App\Models\classroom_student;
 use App\Models\student_guardian;
 use App\Models\student_payment;
 use App\Models\student_subject;
@@ -331,28 +332,48 @@ class StudentController extends Controller
     }
     public function search(Request $request){
         try {
-            $sinif=$request->sinif;
-            $sube=$request->sube;
-            $data=studentinfo::where('sinif',$sinif)
-                ->where('sube',$sube)->get();
-            if ($data){
-                return  response()->json([
+            $sinif_id=$request->sinif_id;
+            $sube_id=$request->sube_id;
+            $ogrenci_no=$request->ogr_no;
+            if ($sinif_id && $sube_id && $ogrenci_no){
+                $ogrenci=studentinfo::where('ogrenci_no',$ogrenci_no)->first();
+                if($ogrenci){
+                    $ogr_id=$ogrenci->id;
+                    $data=classroom_student::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->where('ogrenci_id',$ogr_id)->get();
+                    foreach ($data as $ogr){
+                        $ogrenciBilgisi[]=$ogr->ogrenci_bilgisi;
+                    }
+                    return response()->json([
+                        'status'=>true,
+                        'data'=>$ogrenciBilgisi
+                    ],200);
+                }else{
+                    return response()->json([
+                        'status'=>true,
+                        'mesaj'=>'Listelenicek ogrenci bulunamadı'
+                    ]);
+                }
+
+            }else  if ($sinif_id && $sube_id){
+                $data=classroom_student::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->get();
+                   foreach ($data as $ogr){
+                       $ogrenciBilgisi[]=$ogr->ogrenci_bilgisi;
+                   }
+                return response()->json([
                     'status'=>true,
-                    'data'=>$data
+                    'data'=>$ogrenciBilgisi
                 ],200);
             }else{
                 return response()->json([
-                    'status'=>false,
-                    'message'=>'Sonuc bulunamadı'
-                ],400);
-
+                    'status'=>true,
+                     'message'=>'Lutfen sınıf ve sube seçiniz'
+                ]);
             }
-
         }catch (\Exception $e){
             return response()->json([
                 'status'=>false,
                 'message' =>$e->getMessage()
-            ],400);
+            ]);
         }
 
     }
