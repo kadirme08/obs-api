@@ -29,33 +29,39 @@ class StudentController extends Controller
                 'status'=>false,
                 'message'=>'Kayıtlı öğrenci listesi boş'
             ]);
-
         }
-
     }
     public function studentAdd(Request $request){
         try {
             $validator=Validator::make($request->all(),[
                 'tc_kimlik'=>'required|unique:studentinfo',
-                'ogrenci_no'=>'required|unique:studentinfo',
                 'adres'=>'required',
                 'email'=>'required',
                 'telefon'=>'required',
                 'dogum_tarihi'=>'required',
                 'cinsiyet'=>'required',
-
+                'sube_id'=>'required',
+                'sinif_id'=>'required'
             ]);
             if ($validator->fails()){
                  return response()->json([
                     'status'=>false,
                     'message'=>$validator->errors()->all()
-                 ],422);
-
+                 ]);
             }else{
+             /*
+                $image_name = $request->resim->getClientOriginalName();
+                $upload_path = 'urunler/';
+                $request->resim->move($upload_path, $image_name);
+             */
+
+                $random=rand(1,100);
+                $yil=date('Y');
+                $ogrenci_no=$yil.$random;
                 $user=User::create([
                     'name'=>$request->name,
                     'email'=>$request->email,
-                    'password'=>Hash::make($request->password),
+                    'password'=>Hash::make($ogrenci_no),
                     'Utype'=>'1'
                 ],200);
                 $user->syncRoles('ogrenci');
@@ -63,16 +69,15 @@ class StudentController extends Controller
                 $data=studentinfo::create([
                     'user_id'=>$user_id,
                     'tc_kimlik'=>$request->tc_kimlik,
-                    'ogrenci_no'=>$request->ogrenci_no,
+                    'ogrenci_no'=>$ogrenci_no,
                     'isim_soyisim'=>$request->name,
                     'adres'=>$request->adres,
                     'email'=>$request->email,
                     'telefon'=>$request->telefon,
                     'dogum_tarihi'=>$request->dogum_tarihi,
                     'cinsiyet'=>$request->cinsiyet,
-                    'profil_resim'=>$request->resim,
-                    'sube'=>$request->sube,
-                    'sinif'=>$request->sinif,
+                    'sube_id'=>$request->sube_id,
+                    'sinif_id'=>$request->sinif_id,
                 ],200);
                 /* student_guardian::create([
                      'user_id'=>$user_id,
@@ -340,36 +345,53 @@ class StudentController extends Controller
                 if($ogrenci){
                     $ogr_id=$ogrenci->id;
                     $data=classroom_student::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->where('ogrenci_id',$ogr_id)->get();
-                    foreach ($data as $ogr){
-                        $ogrenciBilgisi[]=$ogr->ogrenci_bilgisi;
-                    }
+                        foreach ($data as $ogr) {
+                            if ($ogr->ogrenci_bilgisi) {
+                                $ogrenciBilgisi[] = $ogr->ogrenci_bilgisi;
+                                return response()->json([
+                                    'status' => true,
+                                    'data' => $ogrenciBilgisi
+                                ], 200);
+                            }
+                        }
                     return response()->json([
-                        'status'=>true,
-                        'data'=>$ogrenciBilgisi
-                    ],200);
+                        'status'=>false,
+                        'message'=>'Listelenicek ogrenci bulunamadı'
+                    ]);
                 }else{
                     return response()->json([
-                        'status'=>true,
-                        'mesaj'=>'Listelenicek ogrenci bulunamadı'
+                        'status'=>false,
+                        'message'=>'Listelenicek ogrenci bulunamadı'
                     ]);
                 }
 
             }else  if ($sinif_id && $sube_id){
                 $data=classroom_student::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->get();
-                   foreach ($data as $ogr){
-                       $ogrenciBilgisi[]=$ogr->ogrenci_bilgisi;
-                   }
-                return response()->json([
-                    'status'=>true,
-                    'data'=>$ogrenciBilgisi
-                ],200);
+                    foreach ($data as $ogr){
+                            $ogrenciBilgisi[]=$ogr->ogrenci_bilgisi;
+                    }
+                    if (isset($ogrenciBilgisi)){
+                        return response()->json([
+                            'status'=>true,
+                            'data'=>$ogrenciBilgisi
+                        ],200);
+
+                    }else{
+                        return response()->json([
+                            'status'=>false,
+                            'message'=>'Listeleencek öğrenci bulunamadı'
+                        ]);
+
+                    }
+
             }else{
                 return response()->json([
-                    'status'=>true,
+                    'status'=>false,
                      'message'=>'Lutfen sınıf ve sube seçiniz'
                 ]);
             }
         }catch (\Exception $e){
+
             return response()->json([
                 'status'=>false,
                 'message' =>$e->getMessage()

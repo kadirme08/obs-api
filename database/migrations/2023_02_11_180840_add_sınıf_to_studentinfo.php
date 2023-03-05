@@ -14,8 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('studentinfo', function (Blueprint $table) {
-            $table->string('sinif')->after('cinsiyet');
-            $table->string('sube')->after('cinsiyet');
+            $table->bigInteger('sinif_id')->after('user_id')->unsigned();
+            $table->bigInteger('sube_id')->after('user_id')->unsigned();
+            $table->foreign('sinif_id')->references('id')->on('classroom')->onDelete('cascade');
+            $table->foreign('sube_id')->references('id')->on('classroom_branch')->onDelete('cascade');
         });
     }
 
