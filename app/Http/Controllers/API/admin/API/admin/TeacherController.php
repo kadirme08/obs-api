@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\API\admin\API\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\studentinfo;
+use App\Models\subject;
+use App\Models\subject_root;
 use App\Models\teacherinfo;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,6 +14,75 @@ use Illuminate\Support\Facades\Validator;
 
 class TeacherController extends Controller
 {
+    public function teacherList(){
+        try {
+            $data=teacherinfo::get();
+          //     $data=subject_root::get();
+
+            if ($data){
+                return response()->json([
+                   'status'=>true,
+                    'data'=>$data
+
+
+                ]);
+            }else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Listelenicek Veri Bulunamadı'
+                ]);
+            }
+
+        }catch (\exception $exception){
+            return response()->json([
+               'status'=>false,
+               'message'=> $exception->getMessage()
+            ],400);
+        }
+    }
+    public function teacherSearch(Request $request){
+        try {
+            $ogretmen_no=$request->ogretmen_no;
+            $isim=$request->isim;
+            if ($isim){
+                $data=teacherinfo::where('isim_soyisim',$isim)->get();
+                if ($data){
+                    return response()->json([
+                        'status'=>true,
+                        'data'=>$data
+                    ]);
+                }else{
+                    return response()->json([
+                        'status'=>false,
+                        'message'=>'Listelenicek Öğretmen bulunamadı'
+                    ]);
+                }
+            }
+            if ($ogretmen_no){
+                $data=teacherinfo::where('ogretmen_no',$ogretmen_no)->get();
+                if ($data){
+                    return response()->json([
+                        'status'=>true,
+                        'data'=>$data
+                    ]);
+                }else{
+                    return response()->json([
+                        'status'=>false,
+                        'message'=>'Listelenicek Öğretmen bulunamadı'
+                    ]);
+                }
+
+            }
+
+
+        }catch (\exception $e){
+            return response()->json([
+               'status'=>false,
+               'message'=>$e->getMessage()
+            ],400);
+        }
+
+    }
     public function teacherAdd(Request $request){
         try {
             $validator=Validator::make($request->all(),[

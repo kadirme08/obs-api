@@ -17,6 +17,27 @@ use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller
 {
+    public function studentUpdateGet($id){
+        try {
+            $data=studentinfo::where('id',$id)->first();
+             if ($data){
+                 return response()->json([
+                     'status'=>true,
+                     'data'=>$data
+                 ],200);
+             }else{
+                 return response()->json([
+                     'status'=>false,
+                     'message'=>'ogrenci Bulunamadı'
+                 ],400);
+             }
+        }catch (\exception $e){
+            return response()->json([
+               'status'=>false,
+               'message'=>$e->getMessage()
+            ]);
+        }
+    }
     public function studentList(){
         $data=studentinfo::all();
         if ($data){
@@ -49,12 +70,12 @@ class StudentController extends Controller
                     'message'=>$validator->errors()->all()
                  ]);
             }else{
-             /*
-                $image_name = $request->resim->getClientOriginalName();
-                $upload_path = 'urunler/';
-                $request->resim->move($upload_path, $image_name);
-             */
-
+                if($request->file('profil_resim')){
+                    $image=$request->file('profil_resim');
+                    $ext=$image->extension();
+                    $file=time().'.'.$ext;
+                    $image->move('public/studentİmage',$file);
+                }
                 $random=rand(1,100);
                 $yil=date('Y');
                 $ogrenci_no=$yil.$random;
@@ -76,6 +97,7 @@ class StudentController extends Controller
                     'telefon'=>$request->telefon,
                     'dogum_tarihi'=>$request->dogum_tarihi,
                     'cinsiyet'=>$request->cinsiyet,
+                    'profil_resim'=>$file,
                     'sube_id'=>$request->sube_id,
                     'sinif_id'=>$request->sinif_id,
                 ],200);
@@ -110,32 +132,19 @@ class StudentController extends Controller
         }
 
     }
-    public function studentGuardianList($id){
-       $user=User::where('id',$id)->first();
-       if($user){
-           return response()->json([
-               'status'=>true,
-               'user'=>$user
-           ],200);
-       }else{
-           return  response()->json([
-              'status'=>false,
-              'message'=>"Öğrenci Bulunamadı"
-           ],);
-       }
-    }
+
     public function studentGuardianUpdate(Request $request,$id){
         try {
             $validator=Validator::make($request->all(),[
-                'tc_kimlik'=>'required|unique:studentinfo',
-                'ogrenci_no'=>'required|unique:studentinfo',
+                'tc_kimlik'=>'required',
+                'ogrenci_no'=>'required',
                 'adres'=>'required',
                 'email'=>'required',
                 'telefon'=>'required',
                 'dogum_tarihi'=>'required',
                 'cinsiyet'=>'required',
-                'sube'=>'required',
-                'sinif'=>'required',
+                'sube_id'=>'required',
+                'sinif_id'=>'required',
             ]);
             if ($validator->fails()){
                 return response()->json([
@@ -144,20 +153,23 @@ class StudentController extends Controller
                 ],422);
 
             }else{
-                $data=studentinfo::where('user_id',$id)->update([
+               /* $image_name = $request->profil_resim->getClientOriginalName();
+                $upload_path = 'images/';
+                $request->profil_resim->move($upload_path, $image_name);*/
+                $data=studentinfo::where('id',$id)->update([
                     'tc_kimlik'=>$request->tc_kimlik,
                     'ogrenci_no'=>$request->ogrenci_no,
-                    'isim_soyisim'=>$request->name,
+                    'isim_soyisim'=>$request->isim_soyisim  ,
                     'adres'=>$request->adres,
                     'email'=>$request->email,
                     'telefon'=>$request->telefon,
                     'dogum_tarihi'=>$request->dogum_tarihi,
                     'cinsiyet'=>$request->cinsiyet,
-                    'profil_resim'=>$request->resim,
-                    'sube'=>$request->sube,
-                    'sinif'=>$request->sinif,
+                    'profil_resim'=>$request->image,
+                    'sube_id'=>$request->sube_id,
+                    'sinif_id'=>$request->sinif_id,
                 ],200);
-                student_guardian::where('user_id',$id)->update([
+              /*student_guardian::where('user_id',$id)->update([
                     'tc_kimlik'=>$request->guardian_tc_kimlik,
                     'isim_soyisim'=>$request->guardian_name,
                     'adres'=>$request->guardian_adres,
@@ -166,7 +178,7 @@ class StudentController extends Controller
                     'dogum_tarihi'=>$request->guardian_dogum_tarihi,
                     'cinsiyet'=>$request->guardian_cinsiyet,
                     'profil_foto'=>$request->guardian_profil_foto
-                ]);
+                ]);*/
                 if ($data){
                     return response()->json([
                         'status'=>true,

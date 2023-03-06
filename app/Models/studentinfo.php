@@ -13,4 +13,6 @@ class studentinfo extends Model
     protected $guarded=[];
 
 
+
+
 }

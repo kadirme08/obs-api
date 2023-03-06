@@ -58,8 +58,8 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
     Route::get('/classroomSearch/{searchTerm}',[ClassromController::class,'searchTerm']);
  //StudentController
     Route::post('/studentAdd',[StudentController::class,'studentAdd']);
-    Route::get('/studentGuardianList/{id}',[StudentController::class,'studentGuardianList']);
-    Route::put('/studentUpdate/{id}',[StudentController::class,'studentGuardianUpdate']);
+    Route::get('/studentUpdatePerson/{id}',[StudentController::class,'studentUpdateGet']);
+    Route::post('/studentUpdate/{id}',[StudentController::class,'studentGuardianUpdate']);
     Route::get('/studentList',[StudentController::class,'studentList']);
     Route::get('/studentSelectClassList',[StudentController::class,'studentSelectClassList']);
     Route::post('/studentSelectClassAdd',[StudentController::class,'studentSelectClassAdd']);
@@ -74,6 +74,8 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
     Route::post('/subjectAdd',[SubjectController::class,'subjectAdd']);
     Route::put('/subjectUpdate/{id}',[SubjectController::class,'subjectUpdate']);
     //Teacher Controller
+    Route::get('/teacherList',[TeacherController::class,'teacherList']);
+    Route::post('/teacherSearch',[TeacherController::class,'teacherSearch']);
     Route::post('/teacherAdd',[TeacherController::class,'teacherAdd']);
     Route::put('/teacherUpdate/{id}',[TeacherController::class,'teacherUpdate']);
     Route::delete('/teacherDelete/{id}',[TeacherController::class,'teacherDelete']);

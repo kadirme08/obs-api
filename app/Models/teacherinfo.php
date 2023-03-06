@@ -11,4 +11,7 @@ class teacherinfo extends Model
 
     protected $table="teacherinfo";
     protected $guarded=[];
+
+
+
 }
