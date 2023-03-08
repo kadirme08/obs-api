@@ -10,7 +10,7 @@ class subject_root extends Model
     use HasFactory;
     protected $table="subject_root";
     protected $guarded=[];
-    protected $with=["sinif","ders","ogretmen"];
+    protected $with=["sinif","ders","sube"];
 
     public function sinif(){
         return $this->hasMany(Classroom::class,'id','sinif_id');
@@ -21,7 +21,9 @@ class subject_root extends Model
     public function ogretmen(){
         return $this->hasOne(teacherinfo::class,'id','ogretmen_id');
     }
-
+   public function sube(){
+        return $this->hasOne(classroom_branch::class,'id','sube_id');
+   }
 }
 
 

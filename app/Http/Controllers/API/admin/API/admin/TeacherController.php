@@ -18,7 +18,6 @@ class TeacherController extends Controller
         try {
             $data=teacherinfo::get();
           //     $data=subject_root::get();
-
             if ($data){
                 return response()->json([
                    'status'=>true,
@@ -46,35 +45,33 @@ class TeacherController extends Controller
             $isim=$request->isim;
             if ($isim){
                 $data=teacherinfo::where('isim_soyisim',$isim)->get();
-                if ($data){
+                if (count($data)>0){
                     return response()->json([
                         'status'=>true,
                         'data'=>$data
-                    ]);
+                    ],200);
                 }else{
+
                     return response()->json([
                         'status'=>false,
                         'message'=>'Listelenicek Öğretmen bulunamadı'
-                    ]);
+                    ],400);
                 }
             }
             if ($ogretmen_no){
                 $data=teacherinfo::where('ogretmen_no',$ogretmen_no)->get();
-                if ($data){
+                if (count($data)>0){
                     return response()->json([
                         'status'=>true,
                         'data'=>$data
-                    ]);
+                    ],200);
                 }else{
                     return response()->json([
                         'status'=>false,
                         'message'=>'Listelenicek Öğretmen bulunamadı'
-                    ]);
+                    ],400);
                 }
-
             }
-
-
         }catch (\exception $e){
             return response()->json([
                'status'=>false,
@@ -86,13 +83,12 @@ class TeacherController extends Controller
     public function teacherAdd(Request $request){
         try {
             $validator=Validator::make($request->all(),[
-                'name'=>'required',
-                'tc_kimlik'=>'required',
-                'adres'=>'required',
-                'cinsiyet'=>'required',
+                 'name'=>'required',
+                 'tc_kimlik'=>'required',
+                 'adres'=>'required',
+                 'cinsiyet'=>'required',
                  'telefon_no'=>'required',
-                'email'=>'required',
-                'profil_foto'=>'required',
+                 'email'=>'required',
             ]);
             if($validator->fails()){
                 return  response()->json([
@@ -117,9 +113,17 @@ class TeacherController extends Controller
                     'cinsiyet'=>$request->cinsiyet,
                     'telefon_no'=>$request->telefon_no,
                     'email'=>$request->email,
+                    'ogretmen_no'=>$request->ogretmen_no,
                     'profil_foto'=>$request->profil_foto
                 ]);
-                 if($data){
+                $ogretmen_id=$data->id;
+                $subject_root=subject_root::create([
+                     'sinif_id'=>$request->sinif_id,
+                     'sube_id'=>$request->sube_id,
+                     'ders_id'=>$request->ders_id,
+                     'ogretmen_id'=>$ogretmen_id
+                 ]);
+                 if($data && $user && $subject_root){
                      return  response()->json([
                         'status'=>true,
                         'message'=>'ogretmen Ekleme İşlemi başarılı'
@@ -130,7 +134,6 @@ class TeacherController extends Controller
                         'message'=>'Ekleme işlemi başarısız oldu lütfen Hizmet aldıgınız sunucudan destek alın'
                      ],400);
                  }
-
             }
         }catch (\Exception $e){
             return response()->json([
@@ -140,7 +143,39 @@ class TeacherController extends Controller
         }
 
     }
+    public  function teacherUpdateList($id){
+        try {
+               $teacher=teacherinfo::where('id',$id)->first();
+               $teacher_id=$teacher->id;
+               $user_id=$teacher->user_id;
+               $subject=subject_root::where('ogretmen_id',$teacher_id)->get();
+               $user=User::where('id',$user_id)->first();
+                foreach ($subject as $value){
+                    $sinif=$value->sinif;
+                    $ders=$value->ders;
+                    $sube=$value->sube;
+                }
+                $data=array('teacher'=>$teacher,'sinif'=>$sinif,'ders'=>$ders,'sube'=>$sube,'user'=>$user);
+               if ($teacher && $teacher_id){
+                    return  response()->json([
+                       'status'=>true,
+                       'data'=>$data,
 
+                    ],200);
+               }else{
+                   return  response()->json([
+                       'status'=>false,
+                        'message'=>'Ogretmen bulunamadı'
+                   ],400);
+               }
+        }catch (\exception $e){
+             return response()->json([
+                'status'=>false,
+                'message'=>$e->getMessage()
+             ],400);
+        }
+
+    }
     public function teacherUpdate(Request $request,$id){
         try {
             $validator=Validator::make($request->all(),[

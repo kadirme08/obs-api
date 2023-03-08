@@ -15,14 +15,10 @@ class SubjectRootController extends Controller
 
     public function List(){
         try {
-      $subject=subject::get();
-      $classroom=Classroom::get();
-      $teacher=teacherinfo::get();
-      $data=array('subject'=>$subject
-                  ,'classroom'=>$classroom,
-                      'teacher'=>$teacher);
+      $data=subject::get();
+
        return  response()->json([
-          'status'=>false,
+          'status'=>true,
            'data'=>$data
        ],200);
 

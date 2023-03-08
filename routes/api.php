@@ -75,6 +75,7 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
     Route::put('/subjectUpdate/{id}',[SubjectController::class,'subjectUpdate']);
     //Teacher Controller
     Route::get('/teacherList',[TeacherController::class,'teacherList']);
+    Route::get('/teacherUpdateList/{id}',[TeacherController::class,'teacherUpdateList']);
     Route::post('/teacherSearch',[TeacherController::class,'teacherSearch']);
     Route::post('/teacherAdd',[TeacherController::class,'teacherAdd']);
     Route::put('/teacherUpdate/{id}',[TeacherController::class,'teacherUpdate']);
