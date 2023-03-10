@@ -19,7 +19,7 @@ class StudentController extends Controller
 {
     public function studentUpdateGet($id){
         try {
-            $data=studentinfo::where('id',$id)->first();
+            $data=classroom_student::where('ogrenci_id',$id)->first();
              if ($data){
                  return response()->json([
                      'status'=>true,
@@ -39,11 +39,14 @@ class StudentController extends Controller
         }
     }
     public function studentList(){
-        $data=studentinfo::all();
+       // $data=studentinfo::all();
+      $data=classroom_student::get();
+
         if ($data){
             return response()->json([
                 'status'=>true,
-                'data'=>$data
+                'data'=>$data,
+               // 'subject'=>$subject
             ]);
         }else{
             return  response()->json([
@@ -61,8 +64,6 @@ class StudentController extends Controller
                 'telefon'=>'required',
                 'dogum_tarihi'=>'required',
                 'cinsiyet'=>'required',
-                'sube_id'=>'required',
-                'sinif_id'=>'required'
             ]);
             if ($validator->fails()){
                  return response()->json([
@@ -70,12 +71,12 @@ class StudentController extends Controller
                     'message'=>$validator->errors()->all()
                  ]);
             }else{
-                if($request->file('profil_resim')){
+               /* if($request->file('profil_resim')){
                     $image=$request->file('profil_resim');
                     $ext=$image->extension();
                     $file=time().'.'.$ext;
-                    $image->move('public/studentİmage',$file);
-                }
+                    $image->move('public/images',$file);
+                }*/
                 $random=rand(1,100);
                 $yil=date('Y');
                 $ogrenci_no=$yil.$random;
@@ -97,10 +98,14 @@ class StudentController extends Controller
                     'telefon'=>$request->telefon,
                     'dogum_tarihi'=>$request->dogum_tarihi,
                     'cinsiyet'=>$request->cinsiyet,
-                    'profil_resim'=>$file,
-                    'sube_id'=>$request->sube_id,
-                    'sinif_id'=>$request->sinif_id,
+                    'profil_resim'=>$request->profil_resim
                 ],200);
+                $ogrenci_id=$data->id;
+                $subject=classroom_student::create([
+                    'sinif_id'=>$request->sinif_id,
+                    'sube_id'=>$request->sube_id,
+                    'ogrenci_id'=>$ogrenci_id
+                ]);
                 /* student_guardian::create([
                      'user_id'=>$user_id,
                      'tc_kimlik'=>$request->guardian_tc_kimlik,
@@ -112,7 +117,7 @@ class StudentController extends Controller
                      'cinsiyet'=>$request->guardian_cinsiyet,
                      'profil_foto'=>$request->guardian_profil_foto
                  ]);*/
-                if ($data){
+                if ($data && $subject){
                     return response()->json([
                        'status'=>true,
                        'message'=>'Öğrenci Kayıt işlemi başarılı'
@@ -132,7 +137,6 @@ class StudentController extends Controller
         }
 
     }
-
     public function studentGuardianUpdate(Request $request,$id){
         try {
             $validator=Validator::make($request->all(),[
@@ -143,8 +147,7 @@ class StudentController extends Controller
                 'telefon'=>'required',
                 'dogum_tarihi'=>'required',
                 'cinsiyet'=>'required',
-                'sube_id'=>'required',
-                'sinif_id'=>'required',
+
             ]);
             if ($validator->fails()){
                 return response()->json([
@@ -165,10 +168,14 @@ class StudentController extends Controller
                     'telefon'=>$request->telefon,
                     'dogum_tarihi'=>$request->dogum_tarihi,
                     'cinsiyet'=>$request->cinsiyet,
-                    'profil_resim'=>$request->image,
-                    'sube_id'=>$request->sube_id,
-                    'sinif_id'=>$request->sinif_id,
+                    'profil_resim'=>$request->profil_resim,
+
                 ],200);
+                $subject=classroom_student::where('ogrenci_id',$id)->update([
+                    'sinif_id'=>$request->sinif_id,
+                    'sube_id'=>$request->sube_id,
+                    'ogrenci_id'=>$id
+                ]);
               /*student_guardian::where('user_id',$id)->update([
                     'tc_kimlik'=>$request->guardian_tc_kimlik,
                     'isim_soyisim'=>$request->guardian_name,
@@ -179,7 +186,7 @@ class StudentController extends Controller
                     'cinsiyet'=>$request->guardian_cinsiyet,
                     'profil_foto'=>$request->guardian_profil_foto
                 ]);*/
-                if ($data){
+                if ($data && $subject){
                     return response()->json([
                         'status'=>true,
                         'message'=>'Öğrenci Güncelleme işlemi başarılı'
@@ -357,19 +364,18 @@ class StudentController extends Controller
                 if($ogrenci){
                     $ogr_id=$ogrenci->id;
                     $data=classroom_student::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->where('ogrenci_id',$ogr_id)->get();
-                        foreach ($data as $ogr) {
-                            if ($ogr->ogrenci_bilgisi) {
-                                $ogrenciBilgisi[] = $ogr->ogrenci_bilgisi;
-                                return response()->json([
-                                    'status' => true,
-                                    'data' => $ogrenciBilgisi
-                                ], 200);
-                            }
+                        if (count($data)>0){
+                            return response()->json([
+                                'status' => true,
+                                'data' => $data
+                            ], 200);
+                        }else{
+                            return response()->json([
+                                'status' => false,
+                                'message' => 'Listelenicek Öğrenci bulunamadı'
+                            ], 200);
                         }
-                    return response()->json([
-                        'status'=>false,
-                        'message'=>'Listelenicek ogrenci bulunamadı'
-                    ]);
+
                 }else{
                     return response()->json([
                         'status'=>false,
@@ -379,22 +385,17 @@ class StudentController extends Controller
 
             }else  if ($sinif_id && $sube_id){
                 $data=classroom_student::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->get();
-                    foreach ($data as $ogr){
-                            $ogrenciBilgisi[]=$ogr->ogrenci_bilgisi;
-                    }
-                    if (isset($ogrenciBilgisi)){
-                        return response()->json([
-                            'status'=>true,
-                            'data'=>$ogrenciBilgisi
-                        ],200);
-
-                    }else{
-                        return response()->json([
-                            'status'=>false,
-                            'message'=>'Listeleencek öğrenci bulunamadı'
-                        ]);
-
-                    }
+                if (count($data)>0){
+                    return response()->json([
+                        'status' => true,
+                        'data' => $data
+                    ], 200);
+                }else{
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Listelenicek Öğrenci bulunamadı'
+                    ], 200);
+                }
 
             }else{
                 return response()->json([

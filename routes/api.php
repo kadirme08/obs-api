@@ -51,11 +51,12 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
 //Classroom Controller
      Route::post('/classroomAdd',[ClassromController::class,'classroomAdd']);
      Route::get('/classroomList',[ClassromController::class,'classroomList']);
+     Route::get('/classroomCount',[ClassromController::class,'classroomCount']);
     Route::get('/classroomBranchList',[ClassromController::class,'classroomBranch']);
      Route::put('/classroomUpdate/{id}',[ClassromController::class,'classroomUpdate']);
     Route::delete('/classroomDelete/{id}',[ClassromController::class,'classroomDelete']);
     Route::put('/classroomChangeStatus/{id}',[ClassromController::class,'changeStatus']);
-    Route::get('/classroomSearch/{searchTerm}',[ClassromController::class,'searchTerm']);
+    Route::post('/classroomSearch',[ClassromController::class,'searchTerm']);
  //StudentController
     Route::post('/studentAdd',[StudentController::class,'studentAdd']);
     Route::get('/studentUpdatePerson/{id}',[StudentController::class,'studentUpdateGet']);
@@ -78,7 +79,7 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
     Route::get('/teacherUpdateList/{id}',[TeacherController::class,'teacherUpdateList']);
     Route::post('/teacherSearch',[TeacherController::class,'teacherSearch']);
     Route::post('/teacherAdd',[TeacherController::class,'teacherAdd']);
-    Route::put('/teacherUpdate/{id}',[TeacherController::class,'teacherUpdate']);
+    Route::post('/teacherUpdate/{id}',[TeacherController::class,'teacherUpdate']);
     Route::delete('/teacherDelete/{id}',[TeacherController::class,'teacherDelete']);
     //Subject Rooting Contorller
     Route::get('/subjectList',[SubjectRootController::class,'List']);

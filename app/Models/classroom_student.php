@@ -22,4 +22,17 @@ class classroom_student extends Model
 
         return $this->hasOne(studentinfo::class,'id','ogrenci_id');
     }
+    /*
+     *
+        foreach ($siniflar as $item) {
+            foreach ($item as $value){
+                if(isset($arr[$value->sinif->sinif_adi.$value->sube->sube])){
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]+=1;
+                }
+                else{
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]=1;
+                }
+            }
+        }
+     */
 }

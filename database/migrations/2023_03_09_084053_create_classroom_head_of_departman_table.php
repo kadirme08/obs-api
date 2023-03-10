@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('studentinfo', function (Blueprint $table) {
-            $table->bigInteger('sinif_id')->after('user_id')->unsigned();
-            $table->bigInteger('sube_id')->after('user_id')->unsigned();
+        Schema::create('classroom_head_of_departman', function (Blueprint $table) {
+            $table->id();
+            $table->bigInteger('sinif_id');
+            $table->bigInteger('ogretmen_id');
             $table->foreign('sinif_id')->references('id')->on('classroom')->onDelete('cascade');
-            $table->foreign('sube_id')->references('id')->on('classroom_branch')->onDelete('cascade');
+            $table->foreign('ogretmen_id')->references('id')->on('teacherinfo')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -28,8 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('studentinfo', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('classroom_head_of_departman');
     }
 };

@@ -16,14 +16,12 @@ class TeacherController extends Controller
 {
     public function teacherList(){
         try {
-            $data=teacherinfo::get();
-          //     $data=subject_root::get();
+            // $data=teacherinfo::get();
+             $data=subject_root::get();
             if ($data){
                 return response()->json([
                    'status'=>true,
                     'data'=>$data
-
-
                 ]);
             }else{
                 return response()->json([
@@ -43,8 +41,15 @@ class TeacherController extends Controller
         try {
             $ogretmen_no=$request->ogretmen_no;
             $isim=$request->isim;
-            if ($isim){
-                $data=teacherinfo::where('isim_soyisim',$isim)->get();
+            $ogretmen=teacherinfo::where('isim_soyisim',$isim)->get();
+            if ($isim && count($ogretmen)>0){
+                foreach ($ogretmen as $ogr)
+                {
+                    $ogretmen_id[]=$ogr->id;
+                     foreach ($ogretmen_id as $ogretmen_bilgisi_id){
+                         $data=subject_root::where('ogretmen_id',$ogretmen_id)->get();
+                     }
+                }
                 if (count($data)>0){
                     return response()->json([
                         'status'=>true,
@@ -57,9 +62,16 @@ class TeacherController extends Controller
                         'message'=>'Listelenicek Öğretmen bulunamadı'
                     ],400);
                 }
-            }
-            if ($ogretmen_no){
-                $data=teacherinfo::where('ogretmen_no',$ogretmen_no)->get();
+            }elseif($ogretmen_no){
+                $ogretmen=teacherinfo::where('ogretmen_no',$ogretmen_no)->get();
+                 if(count($ogretmen)>0){
+                     foreach ($ogretmen as $ogr){
+                         $ogretmen_id[]=$ogr->id;
+                          foreach ($ogretmen_id as $ogretmen_bilgisi_id){
+                              $data=subject_root::where('ogretmen_id',$ogretmen_bilgisi_id)->get();
+                          }
+                     }
+                 }
                 if (count($data)>0){
                     return response()->json([
                         'status'=>true,
@@ -71,6 +83,11 @@ class TeacherController extends Controller
                         'message'=>'Listelenicek Öğretmen bulunamadı'
                     ],400);
                 }
+            }else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Listelenicek Öğretmen bulunamadı'
+                ],400);
             }
         }catch (\exception $e){
             return response()->json([
@@ -185,7 +202,6 @@ class TeacherController extends Controller
                 'cinsiyet'=>'required',
                 'telefon_no'=>'required',
                 'email'=>'required',
-                'profil_foto'=>'required',
             ]);
             if($validator->fails()){
                 return  response()->json([
@@ -196,6 +212,7 @@ class TeacherController extends Controller
             }else{
                 $data=teacherinfo::where('id',$id)->update([
                     'tc_kimlik'=>$request->tc_kimlik,
+                    'ogretmen_no'=>$request->ogretmen_no,
                     'isim_soyisim'=>$request->name,
                     'adres'=>$request->adres,
                     'cinsiyet'=>$request->cinsiyet,
@@ -203,7 +220,20 @@ class TeacherController extends Controller
                     'email'=>$request->email,
                     'profil_foto'=>$request->profil_foto
                 ]);
-                if($data){
+                 $ogretmen=teacherinfo::where('id',$id)->first();
+                 $ogretmen_id=$ogretmen->id;
+                 $subject=subject_root::where('id',$ogretmen_id)->update([
+                    'ders_id'=>$request->ders_id,
+                    'sinif_id'=>$request->sinif_id,
+                    'sube_id'=>$request->sube_id,
+                    'ogretmen_id'=>$ogretmen_id
+                 ]);
+                $user_id=$ogretmen->user_id;
+                $user=User::where('id',$user_id)->update([
+                     'email'=>$request->email,
+                    'password'=>Hash::make($request->password),
+                ]);
+                if($data && $subject && $user){
                     return  response()->json([
                         'status'=>true,
                         'message'=>'ogretmen Güncelleme İşlemi başarılı'
@@ -211,7 +241,8 @@ class TeacherController extends Controller
                 }else{
                     return response()->json([
                         'status'=>false,
-                        'message'=>'Güncelleme işlemi başarısız oldu lütfen Hizmet aldıgınız sunucudan destek alın'
+                        'message'=>'Güncelleme işlemi başarısız oldu lütfen Hizmet aldıgınız sunucudan destek alın',
+
                     ],400);
                 }
 
@@ -224,7 +255,6 @@ class TeacherController extends Controller
         }
 
     }
-
     public function teacherDelete($id){
         try {
             $data1=teacherinfo::where('id',$id)->first();

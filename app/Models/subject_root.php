@@ -10,7 +10,7 @@ class subject_root extends Model
     use HasFactory;
     protected $table="subject_root";
     protected $guarded=[];
-    protected $with=["sinif","ders","sube"];
+    protected $with=["sinif","ders","sube","ogretmen"];
 
     public function sinif(){
         return $this->hasMany(Classroom::class,'id','sinif_id');
