@@ -51,11 +51,12 @@ Route::prefix('admin')->middleware(['auth:sanctum','role:admin'])->group(functio
 //Classroom Controller
      Route::post('/classroomAdd',[ClassromController::class,'classroomAdd']);
      Route::get('/classroomList',[ClassromController::class,'classroomList']);
-     Route::get('/classroomCount',[ClassromController::class,'classroomCount']);
+      Route::get('/classroomList2',[ClassromController::class,'classroomList2']);
     Route::get('/classroomBranchList',[ClassromController::class,'classroomBranch']);
+    Route::get('/classroomGetDetails/{id}',[ClassromController::class,'getClassroomDetais']);
      Route::put('/classroomUpdate/{id}',[ClassromController::class,'classroomUpdate']);
     Route::delete('/classroomDelete/{id}',[ClassromController::class,'classroomDelete']);
-    Route::put('/classroomChangeStatus/{id}',[ClassromController::class,'changeStatus']);
+    Route::post('/classroomChangeStatus',[ClassromController::class,'changeStatus']);
     Route::post('/classroomSearch',[ClassromController::class,'searchTerm']);
  //StudentController
     Route::post('/studentAdd',[StudentController::class,'studentAdd']);

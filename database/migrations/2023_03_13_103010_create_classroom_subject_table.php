@@ -13,13 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('time_table', function (Blueprint $table) {
+        Schema::create('classroom_subject', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('gun_id')->unsigned();
-            $table->bigInteger('sinif_id')->unsigned();
-            $table->bigInteger('ders_id')->unsigned();
-            $table->bigInteger('ogretmen_id')->unsigned();
-            $table->foreign('gun_id')->references('id')->on('days')->onDelete('cascade');
+            $table->bigInteger('sinif_id');
+            $table->bigInteger('ders_id');
+            $table->bigInteger('ogretmen_id');
             $table->foreign('sinif_id')->references('id')->on('classroom_status')->onDelete('cascade');
             $table->foreign('ders_id')->references('id')->on('subject')->onDelete('cascade');
             $table->foreign('ogretmen_id')->references('id')->on('teacherinfo')->onDelete('cascade');
@@ -34,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('time_table');
+        Schema::dropIfExists('classroom_subject');
     }
 };

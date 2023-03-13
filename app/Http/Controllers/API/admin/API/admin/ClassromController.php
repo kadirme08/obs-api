@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Classroom;
 use App\Models\classroom_branch;
 use App\Models\classroom_head_of_departman;
+use App\Models\classroom_status;
 use App\Models\classroom_student;
+use App\Models\classroom_subject;
+use App\Models\subject;
+use App\Models\time_table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -41,32 +45,78 @@ class ClassromController extends Controller
     }
     public  function classroomAdd(Request $request){
         try {
-            $validator=Validator::make($request->all(),[
+             $sinif_adi=$request->sinif_adi;
+             $sube_adi=$request->sube_adi;
+             $ogretmen_id=$request->ogretmen_id;
+             $validator=Validator::make($request->all(),[
                 'sinif_adi'=>'required',
-                'sinif_sayisi'=>'required',
+                'sube_adi'=>'required',
+                'ogretmen_id'=>'required'
             ]);
             if($validator->fails()){
                 return  response()->json([
                     'status'=>false,
                     'message'=>$validator->errors()->all(),
-                ],422);
-            }else{
-                $data=Classroom::create([
-                    'sinif_adi'=>$request->sinif_adi,
-                    'sinif_sayisi'=>$request->sinif_sayisi,
                 ]);
-                if ($data){
-                    return response()->json([
-                        'status'=>true,
-                        'message'=>'Sınıf Ekleme İşlemi başarılı',
-                    ],201);
+            }else{
+                $sinif_true=Classroom::where('sinif_adi',$sinif_adi)->first();
+                $sube_true=classroom_branch::where('sube',$sube_adi)->first();
+                if($sinif_true){
+                    $sinif_id=$sinif_true->id;
                 }else{
-                    return response()->json([
-                        'status'=>false,
-                        'message'=>'sınıf Eklenirken Bir hata olustu'
-                    ],400);
+                    $sinif_2=Classroom::create([
+                        'sinif_adi'=> $sinif_adi
+                    ]);
+                    $sinif_id=$sinif_2->id;
+                }if($sube_true){
+                    $sube_id=$sube_true->id;
+                }else{
+                    $sube=classroom_branch::create([
+                        'sube'=> $sube_adi
+                    ]);
+                    $sube_id=$sube->id;
                 }
-            }
+                $sinif=classroom_status::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->first();
+                $ogretmen=classroom_head_of_departman::where('ogretmen_id',$ogretmen_id)->first();
+                if($ogretmen && $sinif){
+                    return  response()->json([
+                        'status'=>false,
+                        'message'=>'Öğretmen Ve sınıf zaten kayıtlı Lütfen Farklı Bir sınıf ve öğretmen seçiniz..'
+                    ]);
+                }
+                elseif ($sinif){
+                    return  response()->json([
+                        'status'=>false,
+                        'message'=>'Böyle Bir sınıf zaten mevcut..'
+                    ]);
+                }elseif($ogretmen){
+                    return  response()->json([
+                        'status'=>false,
+                        'message'=>'Böyle Bir Öğretmen Başka bir Sınıfın Başkanı Lütfen farklı Öğretmen seçiniz'
+                    ]);
+                }else{
+                    $data=classroom_status::create([
+                        'sinif_id'=>$sinif_id,
+                        'sube_id'=> $sube_id,
+                    ]);
+                    $data2=classroom_head_of_departman::create([
+                        'sinif_id'=>$sinif_id,
+                        'sube_id'=>$sube_id,
+                        'ogretmen_id'=> $ogretmen_id
+                    ]);
+                    if ($data && $data2){
+                        return response()->json([
+                            'status'=>true,
+                            'message'=>'Sınıf Ekleme İşlemi başarılı',
+                        ],201);
+                    }else{
+                        return response()->json([
+                            'status'=>false,
+                            'message'=>'sınıf Eklenirken Bir hata olustu'
+                        ],400);
+                    }
+                }
+             }
         }catch (\exception $e){
             return response()->json([
                 'status'=>false,
@@ -77,28 +127,40 @@ class ClassromController extends Controller
 
     }
     public function classroomList(){
-        $siniflar[]=classroom_student::get();
+        $siniflar[]=classroom_status::get();
         $arr=array();
         foreach ($siniflar as $item) {
             foreach ($item as $value){
                 if(isset($arr[$value->sinif->sinif_adi.$value->sube->sube])){
                     $ogretmen=classroom_head_of_departman::where('sinif_id',$value->sinif_id)->where('sube_id',$value->sube_id)->first();
-                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif"]=$value->sinif->sinif_adi.$value->sube->sube;
-                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["count"]+=1;
+                    $ogrenci_bilgisi=classroom_student::where('sinif_id',$value->id)->get();
+                    foreach ($ogrenci_bilgisi as $ogrenci){
+                        $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$ogrenci->ogrenci_bilgisi->isim_soyisim;
+                        $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$ogrenci->ogrenci_bilgisi->ogrenci_no;
+                        $arr[$value->sinif->sinif_adi.$value->sube->sube]["count"]+=1;
+                    }
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif"]=$value->sinif->sinif_adi.'/'.$value->sube->sube;
                     $arr[$value->sinif->sinif_adi.$value->sube->sube]["ogretmen"]=$ogretmen->sorumluOgretmen->isim_soyisim;
                     $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$value->ogrenci_bilgisi->isim_soyisim;
-
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$value->ogrenci_bilgisi->ogrenci_no;
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]['sinif_status_id']=$value->id;
                 }
                 else{
                     $ogretmen=classroom_head_of_departman::where('sinif_id',$value->sinif_id)->where('sube_id',$value->sube_id)->first();
-                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif"]=$value->sinif->sinif_adi.'/'.$value->sube->sube;
+                    $ogrenci_bilgisi=classroom_student::where('sinif_id',$value->id)->get();
+                     foreach ($ogrenci_bilgisi as $ogrenci){
+                         $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$ogrenci->ogrenci_bilgisi->isim_soyisim;
+                         $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$ogrenci->ogrenci_bilgisi->ogrenci_no;
+                     }
                     $arr[$value->sinif->sinif_adi.$value->sube->sube]["count"]=1;
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif_status_id"]=$value->id;
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif"]=$value->sinif->sinif_adi.'/'.$value->sube->sube;
                     $arr[$value->sinif->sinif_adi.$value->sube->sube]["ogretmen"]=$ogretmen->sorumluOgretmen->isim_soyisim;
-                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$value->ogrenci_bilgisi->isim_soyisim;
-
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["status"]=$value->status;
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif_id"]=$value->sinif_id;
+                    $arr[$value->sinif->sinif_adi.$value->sube->sube]["sube_id"]=$value->sube_id;
                 }
             }
-
         }
         if($arr){
             return  response()->json([
@@ -110,6 +172,22 @@ class ClassromController extends Controller
                 'status'=>false,
                 'Message'=>'Sınıf Listesi Boş '
 
+            ],400);
+        }
+    }
+    public function classroomList2(){
+        try {
+            $data=Classroom::get();
+            if($data){
+                return response()->json([
+                    'status'=>true,
+                    'data'=>$data
+                ]);
+            }
+        }catch (\exception $e){
+            return response()->json([
+               'status'=>false,
+               'message'=>$e->getMessage()
             ],400);
         }
     }
@@ -192,19 +270,58 @@ class ClassromController extends Controller
         }
 
     }
-    public function changeStatus(Request $request,$id){
+    public function changeStatus(Request $request){
         try {
+            $sinif_id=$request->sinif_id;
+            $sube_id=$request->sube_id;
             $status=$request->status;
             if($status==0){
                 $status=1;
-                $data=Classroom::where('id',$id)->update([
-                    'sinif_durum'=>$status
+                $data=classroom_status::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->update([
+                    'status'=>$status
                 ]);
-                if ($data){
+                $siniflar[]=classroom_status::get();
+                $arr=array();
+
+                foreach ($siniflar as $item) {
+                    foreach ($item as $value){
+                        if(isset($arr[$value->sinif->sinif_adi.$value->sube->sube])){
+                            $ogretmen=classroom_head_of_departman::where('sinif_id',$value->sinif_id)->where('sube_id',$value->sube_id)->first();
+                            $ogrenci_bilgisi=classroom_student::where('sinif_id',$value->id)->get();
+                            foreach ($ogrenci_bilgisi as $ogrenci){
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$ogrenci->ogrenci_bilgisi->isim_soyisim;
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$ogrenci->ogrenci_bilgisi->ogrenci_no;
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]["count"]+=1;
+                            }
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif"]=$value->sinif->sinif_adi.'/'.$value->sube->sube;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["ogretmen"]=$ogretmen->sorumluOgretmen->isim_soyisim;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$value->ogrenci_bilgisi->isim_soyisim;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$value->ogrenci_bilgisi->ogrenci_no;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]['sinif_status_id']=$value->id;
+                        }
+                        else{
+                            $ogretmen=classroom_head_of_departman::where('sinif_id',$value->sinif_id)->where('sube_id',$value->sube_id)->first();
+                            $ogrenci_bilgisi=classroom_student::where('sinif_id',$value->id)->get();
+                            foreach ($ogrenci_bilgisi as $ogrenci){
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$ogrenci->ogrenci_bilgisi->isim_soyisim;
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$ogrenci->ogrenci_bilgisi->ogrenci_no;
+                            }
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["count"]=1;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif_status_id"]=$value->id;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif"]=$value->sinif->sinif_adi.'/'.$value->sube->sube;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["ogretmen"]=$ogretmen->sorumluOgretmen->isim_soyisim;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["status"]=$value->status;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif_id"]=$value->sinif_id;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sube_id"]=$value->sube_id;
+                        }
+                    }
+                }
+
+                if ($arr){
                     return response()->json([
                         'status'=>true,
                         'message'=>'Durum Güncelleme başarılı',
-                        'data'=> $data
+                        'data'=> $arr
                     ],200);
 
                 }else{
@@ -214,18 +331,51 @@ class ClassromController extends Controller
                     ],400);
 
                 }
-
-
             }else{
                 $status=0;
-                $data=Classroom::where('id',$id)->update([
-                    'sinif_durum'=>$status
-                ]);
-                if ($data){
+                $data=classroom_status::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->update([
+                    'status'=>$status
+                    ]);
+                $siniflar[]=classroom_status::get();
+                $arr=array();
+                foreach ($siniflar as $item) {
+                    foreach ($item as $value){
+                        if(isset($arr[$value->sinif->sinif_adi.$value->sube->sube])){
+                            $ogretmen=classroom_head_of_departman::where('sinif_id',$value->sinif_id)->where('sube_id',$value->sube_id)->first();
+                            $ogrenci_bilgisi=classroom_student::where('sinif_id',$value->id)->get();
+                            foreach ($ogrenci_bilgisi as $ogrenci){
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$ogrenci->ogrenci_bilgisi->isim_soyisim;
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$ogrenci->ogrenci_bilgisi->ogrenci_no;
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]["count"]+=1;
+                            }
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif"]=$value->sinif->sinif_adi.'/'.$value->sube->sube;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["ogretmen"]=$ogretmen->sorumluOgretmen->isim_soyisim;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$value->ogrenci_bilgisi->isim_soyisim;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$value->ogrenci_bilgisi->ogrenci_no;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]['sinif_status_id']=$value->id;
+                        }
+                        else{
+                            $ogretmen=classroom_head_of_departman::where('sinif_id',$value->sinif_id)->where('sube_id',$value->sube_id)->first();
+                            $ogrenci_bilgisi=classroom_student::where('sinif_id',$value->id)->get();
+                            foreach ($ogrenci_bilgisi as $ogrenci){
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]["students"][]=$ogrenci->ogrenci_bilgisi->isim_soyisim;
+                                $arr[$value->sinif->sinif_adi.$value->sube->sube]['ogrenci_No'][]=$ogrenci->ogrenci_bilgisi->ogrenci_no;
+                            }
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["count"]=1;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif_status_id"]=$value->id;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif"]=$value->sinif->sinif_adi.'/'.$value->sube->sube;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["ogretmen"]=$ogretmen->sorumluOgretmen->isim_soyisim;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["status"]=$value->status;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sinif_id"]=$value->sinif_id;
+                            $arr[$value->sinif->sinif_adi.$value->sube->sube]["sube_id"]=$value->sube_id;
+                        }
+                    }
+                }
+                if ($arr){
                     return response()->json([
                         'status'=>true,
                         'message'=>'Durum Güncelleme başarılı',
-                        'data'=>$data
+                        'data'=>$arr
                     ],200);
 
                 }else{
@@ -257,10 +407,12 @@ class ClassromController extends Controller
                     foreach ($departman as $dep){
                         if(isset( $data[$dep->sinif->sinif_adi.$dep->sube->sube])){
                             $ogretmen=classroom_head_of_departman::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->first();
-                            $data[$dep->sinif->sinif_adi.$dep->sube->sube]['sinif']=$dep->sinif->sinif_adi.$dep->sube->sube;
+                            $data[$dep->sinif->sinif_adi.$dep->sube->sube]['sinif']=$dep->sinif->sinif_adi.'/'.$dep->sube->sube;
                             $data[$dep->sinif->sinif_adi.$dep->sube->sube]['count']+=1;
                             $data[$dep->sinif->sinif_adi.$dep->sube->sube]['ogretmen']=$ogretmen->sorumluOgretmen->isim_soyisim;
                             $data[$dep->sinif->sinif_adi.$dep->sube->sube]['students'][]=$ogretmen->sorumluOgretmen->isim_soyisim;
+                            $data[$dep->sinif->sinif_adi.$dep->sube->sube]['Ogrenci_No'][]=$dep->ogrenci_bilgisi->ogrenci_no;
+
 
                         }else{
                             $ogretmen=classroom_head_of_departman::where('sinif_id',$sinif_id)->where('sube_id',$sube_id)->first();
@@ -268,6 +420,8 @@ class ClassromController extends Controller
                             $data[$dep->sinif->sinif_adi.$dep->sube->sube]['count']=1;
                             $data[$dep->sinif->sinif_adi.$dep->sube->sube]['ogretmen']=$ogretmen->sorumluOgretmen->isim_soyisim;
                             $data[$dep->sinif->sinif_adi.$dep->sube->sube]['students'][]=$dep->ogrenci_bilgisi->isim_soyisim;
+                            $data[$dep->sinif->sinif_adi.$dep->sube->sube]['Ogrenci_No'][]=$dep->ogrenci_bilgisi->ogrenci_no;
+
                         }
                     }
                 }else{
@@ -300,8 +454,32 @@ class ClassromController extends Controller
 
 
     }
-    public function classroomCount(){
+    public function getClassroomDetais($id){
+         $data=classroom_status::where('id',$id)->first();
+         $sinif_id=$data->id;
+         $sinif_adi=$data->sinif_id;
+         $sube_adi=$data->sube_id;
+          $sinif=Classroom::where('id',$sinif_adi)->first();
+          $sube=classroom_branch::where('id',$sube_adi)->first();
+         $student=classroom_student::where('sinif_id',$sinif_id)->get();
+         $ders=classroom_subject::where('sinif_id',$sinif_id)->get();
+         $ders_programi=time_table::where('sinif_id',$id)->get();
+         $ogrenciler=array();
+        foreach ($student as $item){
+               $ogrenciler[$sinif->sinif_adi.$sube->sube]['ogrenciler'][]=$item->ogrenci_bilgisi->isim_soyisim;
+           }
+        foreach ($ders as $value){
+             foreach ($value->ders as $item2){
+                 $ogrenciler[$sinif->sinif_adi.$sube->sube]['sinif_dersleri'][]=$item2->ders_adi;
+             }
 
+            $ogrenciler[$sinif->sinif_adi.$sube->sube]['ogretmen'][]=$value->ogretmen;
+        }
+
+          return response()->json([
+             'data'=>$ogrenciler
+          ]);
     }
+
 
 }

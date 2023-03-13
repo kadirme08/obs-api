@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('classroom_student', function (Blueprint $table) {
+        Schema::create('days', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('sinif_id')->unsigned();
-            $table->bigInteger('ogrenci_id')->unsigned();
-            $table->foreign('ogrenci_id')->references('id')->on('studentinfo')->onDelete('cascade');
-            $table->foreign('sinif_id')->references('id')->on('classroom_status')->onDelete('cascade');
+            $table->string('Günler');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('classroom_student');
+        Schema::dropIfExists('days');
     }
 };
